@@ -6,3 +6,4 @@
    1. query_words.train：原始数据初步提取的query词
    2. cleaned.train：在query_words.train基础上去除URL等无用数据
    3. seg_list.train：在cleaned.train基础上分词
+   4. filter_list.train：在seg_list.train基础上去除停用词
