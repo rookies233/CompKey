@@ -24,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Future<User> login(String username, String password) {
+    if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
+      return Future.failedFuture("Username or password is null");
+    }
     String query = "SELECT * FROM user WHERE username = #{username}";
     Map<String, Object> parameters = Map.of("username", username);
     return SqlTemplate
