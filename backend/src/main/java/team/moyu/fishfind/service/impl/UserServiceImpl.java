@@ -3,6 +3,7 @@ package team.moyu.fishfind.service.impl;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.RowIterator;
+import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.templates.SqlTemplate;
 import team.moyu.fishfind.entity.User;
 import team.moyu.fishfind.service.UserService;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 如果用户名不存在，插入新用户
-        String insertQuery = "INSERT INTO user (username, password) VALUES (#{username}, #{password},#{telephone}, #{email}";
+        String insertQuery = "INSERT INTO user (username, password, telephone, email) VALUES (#{username}, #{password},#{telephone}, #{email})";
         Map<String, Object> insertParameters = Map.of(
           "username", user.getUsername(),
           "password", user.getPassword(),
@@ -110,7 +111,7 @@ public class UserServiceImpl implements UserService {
   public Future<String> deleteUser(Long userId) {
     // 删除用户的查询
     String deleteQuery = "DELETE FROM user WHERE id = #{userId}";
-    Map<String, Object> deleteParameters = Map.of("id", userId);
+    Map<String, Object> deleteParameters = Map.of("userId", userId);
 
     return SqlTemplate
       .forUpdate(client, deleteQuery)

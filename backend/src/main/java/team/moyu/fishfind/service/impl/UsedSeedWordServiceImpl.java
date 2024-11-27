@@ -7,8 +7,9 @@ import io.vertx.sqlclient.templates.SqlTemplate;
 import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.service.UsedSeedWordService;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,12 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
 
   @Override
   public Future<UsedSeedWord> addUsedSeedWord(UsedSeedWord usedSeedWord) {
-    String insertQuery = "INSERT INTO used_seedword (seedword_id, user_id, time) VALUES (#{seedWordId}, #{userId}, #{time}) RETURNING id";
-    usedSeedWord.setTime(new Date());
+    String insertQuery = "INSERT INTO used_seedword (seedword_id, user_id, time) VALUES (#{seedWordId}, #{userId}, #{time})";
+    Date currentDate = new Date();
+    // 定义日期格式
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String formattedDate = dateFormat.format(currentDate);
+    usedSeedWord.setTime(formattedDate);
     Map<String, Object> parameters = Map.of(
       "seedWordId", usedSeedWord.getSeedWordId(),
       "userId", usedSeedWord.getUserId(),

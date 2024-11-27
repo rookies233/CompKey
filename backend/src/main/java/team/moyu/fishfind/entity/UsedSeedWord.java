@@ -10,7 +10,7 @@ public class UsedSeedWord {
   private Long id;
   private Long seedWordId;
   private Long userId;
-  private Date time;
+  private String time;
 
   public Long getId() {
     return id;
@@ -36,11 +36,11 @@ public class UsedSeedWord {
     this.userId = userId;
   }
 
-  public Date getTime() {
+  public String getTime() {
     return time;
   }
 
-  public void setTime(Date time) {
+  public void setTime(String time) {
     this.time = time;
   }
 
