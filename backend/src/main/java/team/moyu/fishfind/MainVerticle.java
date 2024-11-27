@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -42,7 +43,7 @@ public class MainVerticle extends AbstractVerticle {
       .build();
 
     // 初始化服务与处理器
-    ObjectMapper mapper = io.vertx.core.json.jackson.DatabindCodec.mapper();
+    ObjectMapper mapper = DatabindCodec.mapper();
     mapper.registerModule(new JavaTimeModule());
     // 用户管理模块
     UserService userService = new UserServiceImpl(client);
