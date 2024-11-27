@@ -29,8 +29,8 @@ public class UsedSeedWordHandler {
   public void addUsedSeedWord(RoutingContext context) {
     JsonObject body = context.getBodyAsJson();
     UsedSeedWord usedSeedWord = new UsedSeedWord();
-    usedSeedWord.setSeedWordId(body.getLong("seedWordId"));
-    usedSeedWord.setUserId(body.getLong("userId"));
+    usedSeedWord.setSeedWordId(Long.valueOf(body.getString("seedWordId")));
+    usedSeedWord.setUserId(Long.valueOf(body.getString("userId")));
 
     usedSeedWordService.addUsedSeedWord(usedSeedWord)
       .onSuccess(result -> {
