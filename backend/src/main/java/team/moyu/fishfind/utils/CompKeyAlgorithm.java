@@ -6,10 +6,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.huaban.analysis.jieba.WordDictionary;
 import org.apache.commons.io.FileUtils;
 
 public class CompKeyAlgorithm {
@@ -22,6 +25,9 @@ public class CompKeyAlgorithm {
       String filePath = "data/cleaned.train";
       int seedLogCount = 0;
       JiebaSegmenter segment = new JiebaSegmenter();   // 初始化jieba分词器
+      // 加载自定义词典
+      Path dictPath = Paths.get("data/dict/流行网络小说词库.txt");
+      WordDictionary.getInstance().loadUserDict(dictPath);
       Map<String, Double> wordFrequency = new HashMap<>(); // 定义词频统计Map
 
       try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
