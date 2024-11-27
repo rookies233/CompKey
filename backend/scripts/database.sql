@@ -50,3 +50,19 @@ CREATE TABLE used_seedword
 
 INSERT INTO user (username, password, telephone, email)
 VALUES ('admin', '123456', '12345678901', '12345678901@qq.com');
+
+INSERT INTO seedword (word, introduction) VALUES ('图片','图片');
+
+INSERT INTO agencyword(word, seedword_id) VALUES ('大全','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('发型','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('报价','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('唯美','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('价格','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('搞笑','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('2016','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('手机','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('qq','1');
+INSERT INTO agencyword(word, seedword_id) VALUES ('动漫','1');
+
+INSERT INTO used_seedword(seedword_id, user_id, time)
+VALUES ('1','1','2024-11-27 11:30:00')
