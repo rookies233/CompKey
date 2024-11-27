@@ -76,7 +76,15 @@ public class UserServiceImpl implements UserService {
           .compose(updateResult -> {
             // 如果插入成功，返回新用户对象
             if (updateResult.rowCount() > 0) {
-              return Future.succeededFuture(user);
+              return client
+                .preparedQuery("SELECT LAST_INSERT_ID() AS id")
+                .execute()
+                .compose(result -> {
+                  long generatedId = result.iterator().next().getLong("id");
+                  user.setId(generatedId);
+                  return Future.succeededFuture(user);
+
+                });
             } else {
               return Future.failedFuture("Failed to register user");
             }

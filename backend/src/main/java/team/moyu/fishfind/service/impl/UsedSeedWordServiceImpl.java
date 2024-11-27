@@ -38,7 +38,7 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
       "time", usedSeedWord.getTime()
     );
 
-    return SqlTemplate.forQuery(client, insertQuery)
+    return SqlTemplate.forUpdate(client, insertQuery)
       .mapTo(UsedSeedWord.class)
       .execute(parameters)
       .compose(result -> {
@@ -72,7 +72,7 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
   @Override
   public Future<List<UsedSeedWord>> getUsedSeedWord(Long userId) {
     String selectQuery = "SELECT * FROM used_seedword WHERE user_id = #{userId}";
-    Map<String, Object> parameters = Map.of("user_id", userId);
+    Map<String, Object> parameters = Map.of("userId", userId);
 
     return SqlTemplate.forQuery(client, selectQuery)
       .mapTo(UsedSeedWord.class)
