@@ -10,10 +10,7 @@ import team.moyu.fishfind.service.UsedSeedWordService;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author moyu
@@ -72,17 +69,18 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
 
   @Override
   public Future<List<UsedSeedWord>> getUsedSeedWord(Long userId) {
-    String selectQuery = "SELECT * FROM used_seedword WHERE user_id = #{userId}";
-    Map<String, Object> parameters = Map.of("userId", userId);
 
-    return SqlTemplate.forQuery(client, selectQuery)
+    String query = "SELECT * FROM used_seedword WHERE user_id = #{userId}";
+
+    return SqlTemplate
+      .forQuery(client, query)
       .mapTo(UsedSeedWordRowMapper.INSTANCE)
-//      .mapTo(UsedSeedWord.class)
-      .execute(parameters)
+      .execute(Collections.singletonMap("userId", userId))
       .compose(results -> {
         if (results.size() == 0) {
           return Future.failedFuture("User not found");
         }
+
         List<UsedSeedWord> usedSeedWords = new ArrayList<>();
         results.forEach(usedSeedWords::add); // 将结果添加到列表中
         return Future.succeededFuture(usedSeedWords);
