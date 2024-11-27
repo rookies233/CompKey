@@ -20,9 +20,9 @@ public class CompKeyAlgorithm {
     */
     public static void compKey(String seedWord) {
       String filePath = "data/cleaned.train";
-      int seedLogCount = 0;   // 统计包含种子关键词的搜索记录数
+      int seedLogCount = 0;
       JiebaSegmenter segment = new JiebaSegmenter();   // 初始化jieba分词器
-      Map<String, Integer> wordFrequency = new HashMap<>(); // 定义词频统计Map
+      Map<String, Double> wordFrequency = new HashMap<>(); // 定义词频统计Map
 
       try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
         File file1 = new File("data/stop_words/merge_stopwords.txt");
@@ -43,7 +43,7 @@ public class CompKeyAlgorithm {
             segResult.removeAll(stopwords);
             // 统计词频
             for (String word : segResult) {
-              wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
+              wordFrequency.put(word, wordFrequency.getOrDefault(word, 0.0) + 1);
             }
           }
         }
@@ -52,31 +52,27 @@ public class CompKeyAlgorithm {
       }
 
       // 获取频率最高的前十个词，作为中介关键词
-      List<Map.Entry<String, Integer>> agencyWords = wordFrequency.entrySet().stream()
-        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+      List<Map.Entry<String, Double>> agencyWords = wordFrequency.entrySet().stream()
+        .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
         .limit(10)
         .toList();
+
+      // 遍历每一个中介关键词，计算权重
+      int finalSeedLogCount = seedLogCount;
+      agencyWords.forEach(entry -> {
+        double weight = entry.getValue() / finalSeedLogCount;
+        entry.setValue(weight);
+      });
 
       // 打印频率最高的前十个词
       System.out.println("频率最高的前十个词:");
       agencyWords.forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
-
-      System.out.println("seedLogCount" + seedLogCount);
     }
 
     public static void main(String[] args){
       // 设置计时器
       long startTime = System.currentTimeMillis();
-      compKey("图片");
-      compKey("手机");
-      compKey("小说");
-      compKey("视频");
-      compKey("下载");
-      compKey("大全");
-      compKey("qq");
-      compKey("电影");
-      compKey("中国");
-      compKey("世界");
+      compKey("诛仙");
       long endTime = System.currentTimeMillis();
       System.out.println("运行时间：" + (endTime - startTime) + "毫秒");
     }
