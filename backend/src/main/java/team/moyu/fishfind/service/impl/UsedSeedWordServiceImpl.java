@@ -8,6 +8,7 @@ import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.service.UsedSeedWordService;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
     // 定义日期格式
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String formattedDate = dateFormat.format(currentDate);
+
     usedSeedWord.setTime(formattedDate);
     Map<String, Object> parameters = Map.of(
       "seedWordId", usedSeedWord.getSeedWordId(),
@@ -43,11 +45,14 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
       .execute(parameters)
       .compose(result -> {
         if (result.rowCount() > 0) {
-          RowIterator<UsedSeedWord> iterator = result.iterator();
-          if (iterator.hasNext()) {
-            UsedSeedWord newUsedSeedWord = iterator.next();
-            return Future.succeededFuture(newUsedSeedWord);
-          }
+          return client
+            .preparedQuery("SELECT LAST_INSERT_ID() AS id")
+            .execute()
+            .compose(resultId -> {
+              long generatedId = resultId.iterator().next().getLong("id");
+              usedSeedWord.setId(generatedId);
+              return Future.succeededFuture(usedSeedWord);
+            });
         }
         return Future.failedFuture("Failed to add UsedSeedWord");
       });

@@ -1,6 +1,7 @@
 package team.moyu.fishfind;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -42,6 +43,7 @@ public class MainVerticle extends AbstractVerticle {
 
     // 初始化服务与处理器
     ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
     // 用户管理模块
     UserService userService = new UserServiceImpl(client);
     UserHandler userHandler = new UserHandler(userService, mapper);
