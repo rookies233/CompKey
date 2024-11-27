@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import team.moyu.fishfind.common.CommonResponse;
+import team.moyu.fishfind.common.ErrorCode;
 import team.moyu.fishfind.common.ResultUtils;
 import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.service.UsedSeedWordService;
@@ -36,12 +37,17 @@ public class UsedSeedWordHandler {
       .onSuccess(result -> {
         CommonResponse<UsedSeedWord> response = ResultUtils.success(result);
         try {
-          context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));
+          context.response()
+            .putHeader("content-type", "application/json")
+            .end(mapper.writeValueAsString(response));
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }).onFailure(err -> {
-        context.response().setStatusCode(500).putHeader("content-type", "application/json").end(new JsonObject().put("error", err.getMessage()).toString());
+        context.response()
+          .setStatusCode(500)
+          .putHeader("content-type", "application/json")
+          .end(new JsonObject().put("error", err.getMessage()).toString());
       });
   }
 
@@ -65,13 +71,18 @@ public class UsedSeedWordHandler {
       .onSuccess(result -> {
         CommonResponse<List<UsedSeedWord>> response = ResultUtils.success(result);
         try {
-          context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));
+          context.response()
+            .putHeader("content-type", "application/json")
+            .end(mapper.writeValueAsString(response));
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }).onFailure(err -> {
-        context.response().setStatusCode(404).putHeader("content-type", "application/json").end(new JsonObject().put("error", err.getMessage()).toString());
+        err.printStackTrace();
+        context.response()
+          .setStatusCode(404)
+          .putHeader("content-type", "application/json")
+          .end(new JsonObject().put("error", err.getMessage()).toString());
       });
   }
-
 }

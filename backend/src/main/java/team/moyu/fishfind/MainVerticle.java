@@ -28,7 +28,7 @@ public class MainVerticle extends AbstractVerticle {
       .setHost("localhost")
       .setDatabase("fishfind")
       .setUser("root")
-      .setPassword("Hyx_123456");
+      .setPassword("123456");
 
     // 连接池选项
     PoolOptions poolOptions = new PoolOptions()
@@ -42,7 +42,7 @@ public class MainVerticle extends AbstractVerticle {
       .build();
 
     // 初始化服务与处理器
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = io.vertx.core.json.jackson.DatabindCodec.mapper();
     mapper.registerModule(new JavaTimeModule());
     // 用户管理模块
     UserService userService = new UserServiceImpl(client);

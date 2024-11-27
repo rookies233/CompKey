@@ -162,4 +162,4 @@ cython_debug/
 .idea/
 
 data/temp/
-data/processed/
+data/raw/sogou_rematch/

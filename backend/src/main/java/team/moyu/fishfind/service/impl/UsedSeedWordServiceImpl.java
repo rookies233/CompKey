@@ -5,6 +5,7 @@ import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.templates.SqlTemplate;
 import team.moyu.fishfind.entity.UsedSeedWord;
+import team.moyu.fishfind.entity.UsedSeedWordRowMapper;
 import team.moyu.fishfind.service.UsedSeedWordService;
 
 import java.text.SimpleDateFormat;
@@ -28,12 +29,7 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
   @Override
   public Future<UsedSeedWord> addUsedSeedWord(UsedSeedWord usedSeedWord) {
     String insertQuery = "INSERT INTO used_seedword (seedword_id, user_id, time) VALUES (#{seedWordId}, #{userId}, #{time})";
-    Date currentDate = new Date();
-    // 定义日期格式
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String formattedDate = dateFormat.format(currentDate);
-
-    usedSeedWord.setTime(formattedDate);
+    usedSeedWord.setTime(LocalDateTime.now());
     Map<String, Object> parameters = Map.of(
       "seedWordId", usedSeedWord.getSeedWordId(),
       "userId", usedSeedWord.getUserId(),
@@ -80,7 +76,8 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
     Map<String, Object> parameters = Map.of("userId", userId);
 
     return SqlTemplate.forQuery(client, selectQuery)
-      .mapTo(UsedSeedWord.class)
+      .mapTo(UsedSeedWordRowMapper.INSTANCE)
+//      .mapTo(UsedSeedWord.class)
       .execute(parameters)
       .compose(results -> {
         if (results.size() == 0) {

@@ -1,5 +1,5 @@
 CREATE
-  DATABASE fishfind CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  DATABASE IF NOT EXISTS fishfind CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE
   fishfind;
 DROP TABLE IF EXISTS used_seedword;
