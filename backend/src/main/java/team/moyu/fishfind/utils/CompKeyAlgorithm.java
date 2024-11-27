@@ -8,10 +8,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.huaban.analysis.jieba.SegToken;
 import com.huaban.analysis.jieba.WordDictionary;
 import org.apache.commons.io.FileUtils;
 
@@ -26,9 +29,9 @@ public class CompKeyAlgorithm {
       int seedLogCount = 0;
       JiebaSegmenter segment = new JiebaSegmenter();   // 初始化jieba分词器
       // 加载自定义词典
-      Path dictPath = Paths.get("data/dict/流行网络小说词库.txt");
+      Path dictPath = Paths.get("data/dict/dict.txt");
       WordDictionary.getInstance().loadUserDict(dictPath);
-      Map<String, Double> wordFrequency = new HashMap<>(); // 定义词频统计Map
+      Map<String, Integer> wordFrequency = new HashMap<>(); // 定义词频统计Map
 
       try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
         File file1 = new File("data/stop_words/merge_stopwords.txt");
@@ -42,14 +45,15 @@ public class CompKeyAlgorithm {
             line = line.replaceAll("\\s+", "");
 
             // 分词处理
-            List<String> segResult = segment.sentenceProcess(line);
+            List<SegToken> segTokenList = segment.process(line, JiebaSegmenter.SegMode.SEARCH);
+            List<String> segResult = segTokenList.stream().map(segToken -> segToken.word).collect(Collectors.toList());
             // 去除结果中的种子关键词
             segResult.removeIf(word -> word.equals(seedWord));
             // 去除停用词
             segResult.removeAll(stopwords);
             // 统计词频
             for (String word : segResult) {
-              wordFrequency.put(word, wordFrequency.getOrDefault(word, 0.0) + 1);
+              wordFrequency.put(word, wordFrequency.getOrDefault(word, 0) + 1);
             }
           }
         }
@@ -57,22 +61,23 @@ public class CompKeyAlgorithm {
         e.printStackTrace();
       }
 
+      // 遍历每一个中介关键词，计算权重
+      int finalSeedLogCount = seedLogCount;
+
       // 获取频率最高的前十个词，作为中介关键词
-      List<Map.Entry<String, Double>> agencyWords = wordFrequency.entrySet().stream()
-        .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+      List<Map.Entry<String, Integer>> agencyWordsFreq = wordFrequency.entrySet().stream()
+        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
         .limit(10)
         .toList();
 
-      // 遍历每一个中介关键词，计算权重
-      int finalSeedLogCount = seedLogCount;
-      agencyWords.forEach(entry -> {
-        double weight = entry.getValue() / finalSeedLogCount;
-        entry.setValue(weight);
-      });
+      // 生成新的 List<Map.Entry<String, Double>> 变量
+      List<Map.Entry<String, Double>> agencyWordsFreqDouble = agencyWordsFreq.stream()
+        .map(entry -> Map.entry(entry.getKey(), entry.getValue().doubleValue()/finalSeedLogCount))
+        .toList();
 
       // 打印频率最高的前十个词
       System.out.println("频率最高的前十个词:");
-      agencyWords.forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+      agencyWordsFreqDouble.forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
     }
 
     public static void main(String[] args){
