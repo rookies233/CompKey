@@ -20,4 +20,7 @@ public interface UserService {
   // 删除用户
   Future<String> deleteUser(Long userId);
 
+  //获取用户信息
+  Future<User> getUserById(Long userId);
+
 }

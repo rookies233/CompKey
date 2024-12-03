@@ -132,5 +132,43 @@ public class UserHandler {
           .end(new JsonObject().put("error", err.getMessage()).toString());
       });
   }
+  public void getUserById(RoutingContext context) {
+    // 从请求路径中获取用户 ID
+    String userIdParam = context.request().getParam("id");
+    if (userIdParam == null) {
+      context.response().setStatusCode(400).putHeader("content-type", "application/json")
+        .end(new JsonObject().put("error", "User ID is required").toString());
+      return;
+    }
+
+    Long userId;
+    try {
+      userId = Long.valueOf(userIdParam);
+    } catch (NumberFormatException e) {
+      context.response().setStatusCode(400).putHeader("content-type", "application/json")
+        .end(new JsonObject().put("error", "Invalid User ID format").toString());
+      return;
+    }
+
+    userService.getUserById(userId)
+      .onSuccess(user -> {
+        if (user != null) {
+          CommonResponse<User> response = ResultUtils.success(user);
+          try {
+            context.response().putHeader("content-type", "application/json")
+              .end(mapper.writeValueAsString(response));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        } else {
+          context.response().setStatusCode(404).putHeader("content-type", "application/json")
+            .end(new JsonObject().put("error", "User not found").toString());
+        }
+      })
+      .onFailure(err -> {
+        context.response().setStatusCode(500).putHeader("content-type", "application/json")
+          .end(new JsonObject().put("error", err.getMessage()).toString());
+      });
+  }
 
 }

@@ -132,4 +132,28 @@ public class UserServiceImpl implements UserService {
         }
       });
   }
+
+  @Override
+  public Future<User> getUserById(Long userId) {
+    // 检查参数是否为空或无效
+    if (userId == null || userId <= 0) {
+      return Future.failedFuture("Invalid user ID");
+    }
+
+    // 获取用户的查询语句
+    String query = "SELECT * FROM user WHERE id = #{userId}";
+    Map<String, Object> parameters = Map.of("userId", userId);
+
+    return SqlTemplate
+      .forQuery(client, query)
+      .mapTo(User.class)
+      .execute(parameters)
+      .compose(users -> {
+        if (users.size() == 0) {
+          return Future.failedFuture("User not found");
+        }
+        User user = users.iterator().next();
+        return Future.succeededFuture(user);
+      });
+  }
 }

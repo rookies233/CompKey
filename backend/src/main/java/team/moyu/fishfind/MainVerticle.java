@@ -29,7 +29,7 @@ public class MainVerticle extends AbstractVerticle {
       .setHost("localhost")
       .setDatabase("fishfind")
       .setUser("root")
-      .setPassword("Hyx_123456");
+      .setPassword("123456");
 
     // 连接池选项
     PoolOptions poolOptions = new PoolOptions()
@@ -64,6 +64,8 @@ public class MainVerticle extends AbstractVerticle {
     router.put("/users/:id").handler(userHandler::updateUser);
     // 删除用户
     router.delete("/users/:id").handler(userHandler::deleteUser);
+    //获取用户信息
+    router.get("/users/:id").handler(userHandler::getUserById);
 
     // 用户搜索记录管理模块
     // 添加搜索记录
