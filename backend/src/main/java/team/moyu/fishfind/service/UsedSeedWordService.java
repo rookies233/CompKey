@@ -2,6 +2,7 @@ package team.moyu.fishfind.service;
 
 import io.vertx.core.Future;
 import team.moyu.fishfind.entity.UsedSeedWord;
+import team.moyu.fishfind.vo.UsedSeedWordsVo;
 
 import java.util.List;
 
@@ -17,6 +18,6 @@ public interface UsedSeedWordService {
   Future<String> deleteUsedSeedWord(Long id);
 
   // 查询搜索记录
-  Future<List<UsedSeedWord>> getUsedSeedWord(Long userId);
+  Future<List<UsedSeedWordsVo>> getUsedSeedWord(Long userId);
 
 }

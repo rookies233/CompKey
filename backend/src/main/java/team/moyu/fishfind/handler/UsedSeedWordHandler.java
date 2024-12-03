@@ -9,6 +9,7 @@ import team.moyu.fishfind.common.ErrorCode;
 import team.moyu.fishfind.common.ResultUtils;
 import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.service.UsedSeedWordService;
+import team.moyu.fishfind.vo.UsedSeedWordsVo;
 
 import java.util.List;
 
@@ -69,7 +70,7 @@ public class UsedSeedWordHandler {
 
     usedSeedWordService.getUsedSeedWord(userId)
       .onSuccess(result -> {
-        CommonResponse<List<UsedSeedWord>> response = ResultUtils.success(result);
+        CommonResponse<List<UsedSeedWordsVo>> response = ResultUtils.success(result);
         try {
           context.response()
             .putHeader("content-type", "application/json")

@@ -2,15 +2,16 @@ package team.moyu.fishfind.service.impl;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Pool;
-import io.vertx.sqlclient.RowIterator;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.templates.SqlTemplate;
 import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.entity.UsedSeedWordRowMapper;
 import team.moyu.fishfind.service.UsedSeedWordService;
+import team.moyu.fishfind.vo.UsedSeedWordsVo;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author moyu
@@ -68,22 +69,53 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
   }
 
   @Override
-  public Future<List<UsedSeedWord>> getUsedSeedWord(Long userId) {
+  public Future<List<UsedSeedWordsVo>> getUsedSeedWord(Long userId) {
 
     String query = "SELECT * FROM used_seedword WHERE user_id = #{userId}";
 
     return SqlTemplate
       .forQuery(client, query)
-      .mapTo(UsedSeedWordRowMapper.INSTANCE)
       .execute(Collections.singletonMap("userId", userId))
-      .compose(results -> {
-        if (results.size() == 0) {
+      .compose(usedSeedWordResults -> {
+
+        if (usedSeedWordResults.size() == 0) {
           return Future.failedFuture("User not found");
         }
 
-        List<UsedSeedWord> usedSeedWords = new ArrayList<>();
-        results.forEach(usedSeedWords::add); // 将结果添加到列表中
-        return Future.succeededFuture(usedSeedWords);
+        // 提取 seedword_id 和 time
+        List<Long> seedWordIds = new ArrayList<>();
+        List<LocalDateTime> dates = new ArrayList<>();
+        usedSeedWordResults.forEach(row -> {
+          seedWordIds.add(row.getLong("seedword_id"));
+          dates.add(row.getLocalDateTime("time"));
+        });
+
+        // 生成动态的 IN 子句
+        String idsPlaceholder = seedWordIds.stream()
+          .map(String::valueOf)
+          .collect(Collectors.joining(", "));
+
+        // 查询 seedword 表
+        String querySeedWord = "SELECT word FROM seedword WHERE id IN (" + idsPlaceholder + ")";
+        return SqlTemplate
+          .forQuery(client, querySeedWord)
+          .execute(Collections.emptyMap())
+          .compose(seedWordResults -> {
+            // 映射到 UsedSeedWordsVo
+            List<UsedSeedWordsVo> usedSeedWords = new ArrayList<>();
+            Iterator<Row> iterator = seedWordResults.iterator();
+            int index = 0;
+            while (iterator.hasNext()) {
+              Row row = iterator.next();
+              String word = row.getString("word");
+              LocalDateTime date = dates.get(index++); // 获取对应的时间
+              UsedSeedWordsVo vo = new UsedSeedWordsVo();
+              vo.setSeedWord(word);
+              vo.setTime(date);
+              usedSeedWords.add(vo);
+            }
+            return Future.succeededFuture(usedSeedWords);
+          });
       });
   }
 
