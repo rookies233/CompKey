@@ -5,6 +5,7 @@ import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.templates.SqlTemplate;
+import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 import team.moyu.fishfind.service.UserService;
 
@@ -22,7 +23,9 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Future<User> login(String username, String password) {
+  public Future<User> login(UserLoginReqDTO requestParam) {
+    String username = requestParam.getUsername();
+    String password = requestParam.getPassword();
     if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
       return Future.failedFuture("Username or password is null");
     }

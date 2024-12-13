@@ -3,11 +3,15 @@ package team.moyu.fishfind.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.RoutingContext;
 import team.moyu.fishfind.common.CommonResponse;
 import team.moyu.fishfind.common.ResultUtils;
+import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 import team.moyu.fishfind.service.UserService;
+
+import java.util.Map;
 
 /**
  * @author moyu
@@ -25,11 +29,7 @@ public class UserHandler {
 
   // 登录
   public void login(RoutingContext context) {
-    JsonObject body = context.getBodyAsJson();
-    String username = body.getString("username");
-    String password = body.getString("password");
-
-    userService.login(username, password)
+    userService.login(context.body().asPojo(UserLoginReqDTO.class))
       .onSuccess(user -> {
         CommonResponse<User> response = ResultUtils.success(user);
         try {

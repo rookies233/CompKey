@@ -1,6 +1,7 @@
 package team.moyu.fishfind.service;
 
 import io.vertx.core.Future;
+import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 
 /**
@@ -9,7 +10,7 @@ import team.moyu.fishfind.entity.User;
 public interface UserService {
 
   // 登录
-  Future<User> login(String username, String password);
+  Future<User> login(UserLoginReqDTO requestParam);
 
   // 注册
   Future<User> register(User user);
