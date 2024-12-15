@@ -8,6 +8,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.Pool;
@@ -52,9 +53,22 @@ public class MainVerticle extends AbstractVerticle {
     UsedSeedWordService usedSeedWordService = new UsedSeedWordServiceImpl(client);
     UsedSeedWordHandler usedSeedWordHandler = new UsedSeedWordHandler(usedSeedWordService, mapper);
 
+
+
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
 
+    CorsHandler corsHandler = CorsHandler.create("*")
+      .allowedMethod(io.vertx.core.http.HttpMethod.GET)
+      .allowedMethod(io.vertx.core.http.HttpMethod.POST)
+      .allowedMethod(io.vertx.core.http.HttpMethod.PUT)
+      .allowedMethod(io.vertx.core.http.HttpMethod.DELETE)
+      .allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS)
+      .allowedHeader("Content-Type")
+      .allowedHeader("Authorization");
+
+    // 将 CorsHandler 添加到路由链中
+    router.route().handler(corsHandler);
     // 用户管理模块
     // 登录
     router.post("/users/login").handler(userHandler::login);
