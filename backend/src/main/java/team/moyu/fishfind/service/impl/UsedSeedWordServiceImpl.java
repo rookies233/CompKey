@@ -79,13 +79,15 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
       .compose(usedSeedWordResults -> {
 
         if (usedSeedWordResults.size() == 0) {
-          return Future.failedFuture("User not found");
+          return Future.succeededFuture(null);
         }
 
-        // 提取 seedword_id 和 time
+        // 提取 id、seedword_id 和 time
+        List<Long> ids = new ArrayList<>();
         List<Long> seedWordIds = new ArrayList<>();
         List<LocalDateTime> dates = new ArrayList<>();
         usedSeedWordResults.forEach(row -> {
+          ids.add(row.getLong("id"));
           seedWordIds.add(row.getLong("seedword_id"));
           dates.add(row.getLocalDateTime("time"));
         });
@@ -107,12 +109,15 @@ public class UsedSeedWordServiceImpl implements UsedSeedWordService {
             int index = 0;
             while (iterator.hasNext()) {
               Row row = iterator.next();
+              Long id = ids.get(index);
               String word = row.getString("word");
-              LocalDateTime date = dates.get(index++); // 获取对应的时间
+              LocalDateTime date = dates.get(index); // 获取对应的时间
               UsedSeedWordsVo vo = new UsedSeedWordsVo();
+              vo.setId(id);
               vo.setSeedWord(word);
               vo.setTime(date);
               usedSeedWords.add(vo);
+              index++;
             }
             return Future.succeededFuture(usedSeedWords);
           });
