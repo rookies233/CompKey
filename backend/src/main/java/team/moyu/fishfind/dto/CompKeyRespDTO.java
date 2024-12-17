@@ -1,5 +1,7 @@
 package team.moyu.fishfind.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,20 @@ public class CompKeyRespDTO {
   private String compWord;
 
   private Double compScore;
+
+  /**
+   * 竞争关键词 k 与中介关键词 a 的共现次数
+   */
+  @JsonIgnore
+  private Long ka;
+
+  public Long getKa() {
+    return ka;
+  }
+
+  public void setKa(Long ka) {
+    this.ka = ka;
+  }
 
   public String getCompWord() {
     return compWord;

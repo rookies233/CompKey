@@ -14,6 +14,11 @@ public class AgencyWordInfo {
    */
   private long sa;
 
+  /**
+   * 权重
+   */
+  private double weight;
+
   public String getAgencyWord() {
     return agencyWord;
   }
@@ -36,5 +41,13 @@ public class AgencyWordInfo {
 
   public void setSa(long sa) {
     this.sa = sa;
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+  public void setWeight(double weight) {
+    this.weight = weight;
   }
 }
