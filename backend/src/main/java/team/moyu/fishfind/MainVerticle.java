@@ -70,8 +70,8 @@ public class MainVerticle extends AbstractVerticle {
     UsedSeedWordService usedSeedWordService = new UsedSeedWordServiceImpl(client);
     UsedSeedWordHandler usedSeedWordHandler = new UsedSeedWordHandler(usedSeedWordService, mapper);
 
-    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient);
-    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, mapper);
+    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient, client);
+    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, usedSeedWordService, mapper);
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());

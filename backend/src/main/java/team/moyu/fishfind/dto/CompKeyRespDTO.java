@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
 public class CompKeyRespDTO {
+  private Integer compWordId;
+
   /**
    * 竞争性关键词
    */
@@ -17,5 +19,13 @@ public class CompKeyRespDTO {
 
   public void setCompWord(String compWord) {
     this.compWord = compWord;
+  }
+
+  public Integer getCompWordId() {
+    return compWordId;
+  }
+
+  public void setCompWordId(Integer compWordId) {
+    this.compWordId = compWordId;
   }
 }

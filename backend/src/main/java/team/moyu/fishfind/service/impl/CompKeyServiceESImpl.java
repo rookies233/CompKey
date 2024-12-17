@@ -1,9 +1,13 @@
 package team.moyu.fishfind.service.impl;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.sqlclient.Pool;
+import io.vertx.sqlclient.Tuple;
+import io.vertx.sqlclient.templates.SqlTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -17,6 +21,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
+import team.moyu.fishfind.entity.CompWord;
 import team.moyu.fishfind.model.AgencyWordInfo;
 import team.moyu.fishfind.service.CompKeyService;
 import org.elasticsearch.client.*;
@@ -25,14 +30,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Parameter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CompKeyServiceESImpl implements CompKeyService {
 
   private final RestHighLevelClient client;
+
+  private final Pool sqlClient;
 
   private static final Set<String> stopWords;
 
@@ -49,14 +55,79 @@ public class CompKeyServiceESImpl implements CompKeyService {
     System.out.println("停用词加载完成");
   }
 
-  public CompKeyServiceESImpl(RestHighLevelClient client) {
+  public CompKeyServiceESImpl(RestHighLevelClient client, Pool sqlClient) {
     this.client = client;
+    this.sqlClient = sqlClient;
   }
 
   @Override
   public Future<List<CompKeyRespDTO>> getCompKeys(String seedWord) {
     return getAgencyWords(seedWord)
-      .compose(agencyWordInfos -> getCompetitorKeywords(seedWord, agencyWordInfos));
+      .compose(agencyWordInfos -> getCompetitorKeywords(seedWord, agencyWordInfos))
+      .compose(this::saveCompKey);
+  }
+
+  private Future<List<CompKeyRespDTO>> saveCompKey(List<CompKeyRespDTO> compKeys) {
+    Promise<List<CompKeyRespDTO>> promise = Promise.promise();
+    List<Future> futures = new ArrayList<>();
+
+    for (CompKeyRespDTO compKey : compKeys) {
+      Future<Long> future = Future.future(promise1 -> {
+        // 先查询数据库，检查关键词是否已经存在
+        SqlTemplate.forQuery(sqlClient, "SELECT * FROM compword WHERE word = #{word}")
+          .mapTo(Long.class)
+          .execute(Map.of("word", compKey.getCompWord()))
+          .onSuccess(rows -> {
+            if (rows.size() > 0) {
+              // 关键词已经存在，获取其ID并跳过插入
+              Long existingId = rows.iterator().next();
+              compKey.setCompWordId(existingId.intValue());
+              promise1.complete(existingId);
+            } else {
+              // 关键词不存在，执行插入操作
+              SqlTemplate.forUpdate(sqlClient, "INSERT INTO compword (word) VALUES (#{word})")
+                .execute(Map.of("word", compKey.getCompWord()))
+                .onSuccess(voidSqlResult -> {
+                  SqlTemplate.forQuery(sqlClient, "SELECT LAST_INSERT_ID() AS id")
+                    .mapTo(Long.class)
+                    .execute(Map.of())
+                    .onSuccess(rowSet -> {
+                      Long id = rowSet.iterator().next();
+                      compKey.setCompWordId(Math.toIntExact(id));
+                      promise1.complete(id);
+                    })
+                    .onFailure(err -> {
+                      err.printStackTrace();
+                      promise1.fail(err);
+                    });
+                })
+                .onFailure(err -> {
+                  err.printStackTrace();
+                  promise1.fail(err);
+                });
+            }
+          })
+          .onFailure(err -> {
+            err.printStackTrace();
+            promise1.fail(err);
+          });
+      });
+      futures.add(future);
+    }
+
+    CompositeFuture.all(futures)
+      .onSuccess(compositeFuture -> {
+        List<CompKeyRespDTO> updatedCompKeys = compKeys.stream()
+          .filter(dto -> dto.getCompWordId() != null)
+          .collect(Collectors.toList());
+        promise.complete(updatedCompKeys);
+      })
+      .onFailure(err -> {
+        err.printStackTrace();
+        promise.fail(err);
+      });
+
+    return promise.future();
   }
 
   private Future<List<AgencyWordInfo>> getAgencyWords(String seedWord) {

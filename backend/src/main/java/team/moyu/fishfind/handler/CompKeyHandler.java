@@ -9,6 +9,7 @@ import team.moyu.fishfind.common.CommonResponse;
 import team.moyu.fishfind.common.ResultUtils;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
 import team.moyu.fishfind.service.CompKeyService;
+import team.moyu.fishfind.service.UsedSeedWordService;
 
 import java.util.List;
 
@@ -16,10 +17,13 @@ public class CompKeyHandler {
 
   private final CompKeyService compKeyService;
 
+  private final UsedSeedWordService usedSeedWordService;
+
   private final ObjectMapper mapper;
 
-  public CompKeyHandler(CompKeyService compKeyService, ObjectMapper mapper) {
+  public CompKeyHandler(CompKeyService compKeyService, UsedSeedWordService usedSeedWordService, ObjectMapper mapper) {
     this.compKeyService = compKeyService;
+    this.usedSeedWordService = usedSeedWordService;
     this.mapper = mapper;
   }
 
