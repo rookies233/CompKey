@@ -15,13 +15,13 @@ CREATE TABLE seedword
   word         VARCHAR(20) NOT NULL COMMENT '种子关键词名称',
   introduction VARCHAR(500) DEFAULT NULL COMMENT '种子关键词介绍信息'
 ) COMMENT = '种子关键词表';
-CREATE TABLE agencyword
-(
-  id          INT AUTO_INCREMENT PRIMARY KEY COMMENT '中介关键词ID',
-  word        VARCHAR(20) NOT NULL COMMENT '中介关键词名称',
-  seedword_id INT         NOT NULL COMMENT '种子关键词ID',
-  FOREIGN KEY (seedword_id) REFERENCES seedword (id) ON DELETE CASCADE
-) COMMENT = '中介关键词表';
+# CREATE TABLE agencyword
+# (
+#   id          INT AUTO_INCREMENT PRIMARY KEY COMMENT '中介关键词ID',
+#   word        VARCHAR(20) NOT NULL COMMENT '中介关键词名称',
+#   seedword_id INT         NOT NULL COMMENT '种子关键词ID',
+#   FOREIGN KEY (seedword_id) REFERENCES seedword (id) ON DELETE CASCADE
+# ) COMMENT = '中介关键词表';
 CREATE TABLE compword
 (
   id         INT AUTO_INCREMENT PRIMARY KEY COMMENT '竞争关键词ID',
@@ -52,26 +52,26 @@ VALUES ('admin', '123456', '12345678901', '12345678901@qq.com');
 INSERT INTO seedword (word, introduction)
 VALUES ('图片', '图片');
 
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('大全', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('发型', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('报价', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('唯美', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('价格', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('搞笑', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('2016', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('手机', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('qq', '1');
-INSERT INTO agencyword(word, seedword_id)
-VALUES ('动漫', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('大全', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('发型', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('报价', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('唯美', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('价格', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('搞笑', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('2016', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('手机', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('qq', '1');
+# INSERT INTO agencyword(word, seedword_id)
+# VALUES ('动漫', '1');
 
 INSERT INTO used_seedword(seedword_id, user_id, time)
 VALUES ('1', '1', '2024-11-27 11:30:00')

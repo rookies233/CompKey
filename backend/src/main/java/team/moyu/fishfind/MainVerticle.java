@@ -20,14 +20,8 @@ import team.moyu.fishfind.handler.CommentHandler;
 import team.moyu.fishfind.handler.CompKeyHandler;
 import team.moyu.fishfind.handler.UsedSeedWordHandler;
 import team.moyu.fishfind.handler.UserHandler;
-import team.moyu.fishfind.service.CommentService;
-import team.moyu.fishfind.service.CompKeyService;
-import team.moyu.fishfind.service.UsedSeedWordService;
-import team.moyu.fishfind.service.UserService;
-import team.moyu.fishfind.service.impl.CommentServiceImpl;
-import team.moyu.fishfind.service.impl.CompKeyServiceESImpl;
-import team.moyu.fishfind.service.impl.UsedSeedWordServiceImpl;
-import team.moyu.fishfind.service.impl.UserServiceImpl;
+import team.moyu.fishfind.service.*;
+import team.moyu.fishfind.service.impl.*;
 import org.elasticsearch.client.*;
 
 public class MainVerticle extends AbstractVerticle {
@@ -72,12 +66,15 @@ public class MainVerticle extends AbstractVerticle {
     //用户搜索记录管理模块
     UsedSeedWordService usedSeedWordService = new UsedSeedWordServiceImpl(client);
     UsedSeedWordHandler usedSeedWordHandler = new UsedSeedWordHandler(usedSeedWordService, mapper);
+    // 种子关键词
+    SeedWordService seedWordService = new SeedWordServiceImpl(client);
     // 搜索模块
-    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient);
-    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, mapper);
+    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient, client, usedSeedWordService, seedWordService);
+    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, usedSeedWordService, mapper);
     // 评论模块
     CommentService commentService = new CommentServiceImpl(client);
     CommentHandler commentHandler = new CommentHandler(commentService, mapper);
+
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());

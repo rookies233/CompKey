@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import team.moyu.fishfind.common.CommonResponse;
 import team.moyu.fishfind.common.ResultUtils;
+import team.moyu.fishfind.dto.CompKeyReqDTO;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
 import team.moyu.fishfind.service.CompKeyService;
 import team.moyu.fishfind.service.UsedSeedWordService;
@@ -29,7 +30,11 @@ public class CompKeyHandler {
 
   public void getCompWords(RoutingContext context) {
     String seedWord = context.request().getParam("seedWord");
-    compKeyService.getCompKeys(seedWord).onSuccess(results -> {
+    Long userId = Long.parseLong(context.request().getParam("userId"));
+    CompKeyReqDTO requestParam = new CompKeyReqDTO();
+    requestParam.setSeedWord(seedWord);
+    requestParam.setUserId(userId);
+    compKeyService.getCompKeys(requestParam).onSuccess(results -> {
       CommonResponse<List<CompKeyRespDTO>> response = ResultUtils.success(results);
       try {
         context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));

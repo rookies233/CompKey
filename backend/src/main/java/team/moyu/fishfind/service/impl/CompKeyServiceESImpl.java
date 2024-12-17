@@ -20,11 +20,16 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import team.moyu.fishfind.dto.CompKeyReqDTO;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
 import team.moyu.fishfind.entity.CompWord;
+import team.moyu.fishfind.entity.CompWordRowMapper;
+import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.model.AgencyWordInfo;
 import team.moyu.fishfind.service.CompKeyService;
 import org.elasticsearch.client.*;
+import team.moyu.fishfind.service.SeedWordService;
+import team.moyu.fishfind.service.UsedSeedWordService;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,6 +44,10 @@ public class CompKeyServiceESImpl implements CompKeyService {
   private final RestHighLevelClient client;
 
   private final Pool sqlClient;
+
+  private final UsedSeedWordService usedSeedWordService;
+
+  private final SeedWordService seedWordService;
 
   private static final Set<String> stopWords;
 
@@ -55,15 +64,26 @@ public class CompKeyServiceESImpl implements CompKeyService {
     System.out.println("停用词加载完成");
   }
 
-  public CompKeyServiceESImpl(RestHighLevelClient client, Pool sqlClient) {
+  public CompKeyServiceESImpl(RestHighLevelClient client, Pool sqlClient, UsedSeedWordService usedSeedWordService, SeedWordService seedWordService) {
     this.client = client;
     this.sqlClient = sqlClient;
+    this.usedSeedWordService = usedSeedWordService;
+    this.seedWordService = seedWordService;
   }
 
   @Override
-  public Future<List<CompKeyRespDTO>> getCompKeys(String seedWord) {
-    return getAgencyWords(seedWord)
-      .compose(agencyWordInfos -> getCompetitorKeywords(seedWord, agencyWordInfos))
+  public Future<List<CompKeyRespDTO>> getCompKeys(CompKeyReqDTO requestParam) {
+    seedWordService
+      .addSeedWord(requestParam.getSeedWord())
+      .onSuccess(seedWord -> {
+        UsedSeedWord usedSeedWord = new UsedSeedWord();
+        usedSeedWord.setSeedWordId(seedWord.getId());
+        usedSeedWord.setUserId(requestParam.getUserId());
+        usedSeedWordService.addUsedSeedWord(usedSeedWord);
+    });
+
+    return getAgencyWords(requestParam.getSeedWord())
+      .compose(agencyWordInfos -> getCompetitorKeywords(requestParam.getSeedWord(), agencyWordInfos))
       .compose(this::saveCompKey);
   }
 
@@ -74,14 +94,14 @@ public class CompKeyServiceESImpl implements CompKeyService {
     for (CompKeyRespDTO compKey : compKeys) {
       Future<Long> future = Future.future(promise1 -> {
         // 先查询数据库，检查关键词是否已经存在
-        SqlTemplate.forQuery(sqlClient, "SELECT * FROM compword WHERE word = #{word}")
-          .mapTo(Long.class)
-          .execute(Map.of("word", compKey.getCompWord()))
+        SqlTemplate.forQuery(sqlClient, "SELECT * FROM compword WHERE word=#{word}")
+          .mapTo(CompWord.class)
+          .execute(Collections.singletonMap("word", compKey.getCompWord()))
           .onSuccess(rows -> {
             if (rows.size() > 0) {
               // 关键词已经存在，获取其ID并跳过插入
-              Long existingId = rows.iterator().next();
-              compKey.setCompWordId(existingId.intValue());
+              Long existingId = rows.iterator().next().getId();
+              compKey.setCompWordId(existingId);
               promise1.complete(existingId);
             } else {
               // 关键词不存在，执行插入操作
@@ -89,11 +109,11 @@ public class CompKeyServiceESImpl implements CompKeyService {
                 .execute(Map.of("word", compKey.getCompWord()))
                 .onSuccess(voidSqlResult -> {
                   SqlTemplate.forQuery(sqlClient, "SELECT LAST_INSERT_ID() AS id")
-                    .mapTo(Long.class)
+                    .mapTo(CompWord.class)
                     .execute(Map.of())
                     .onSuccess(rowSet -> {
-                      Long id = rowSet.iterator().next();
-                      compKey.setCompWordId(Math.toIntExact(id));
+                      Long id = rowSet.iterator().next().getId();
+                      compKey.setCompWordId(id);
                       promise1.complete(id);
                     })
                     .onFailure(err -> {
@@ -117,10 +137,7 @@ public class CompKeyServiceESImpl implements CompKeyService {
 
     CompositeFuture.all(futures)
       .onSuccess(compositeFuture -> {
-        List<CompKeyRespDTO> updatedCompKeys = compKeys.stream()
-          .filter(dto -> dto.getCompWordId() != null)
-          .collect(Collectors.toList());
-        promise.complete(updatedCompKeys);
+        promise.complete(compKeys);
       })
       .onFailure(err -> {
         err.printStackTrace();

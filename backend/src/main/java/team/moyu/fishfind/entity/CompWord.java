@@ -1,5 +1,6 @@
 package team.moyu.fishfind.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.sqlclient.templates.annotations.Column;
 import io.vertx.sqlclient.templates.annotations.RowMapped;
@@ -20,9 +21,36 @@ import io.vertx.sqlclient.templates.annotations.RowMapped;
 @RowMapped
 public class CompWord {
   @Column(name = "id")
+  @JsonProperty("id")
   private Long id;
   @Column(name = "word")
+  @JsonProperty("word")
   private String word;
   @Column(name = "compdegree")
+  @JsonProperty("compdegree")
   private Double compDegree;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getWord() {
+    return word;
+  }
+
+  public void setWord(String word) {
+    this.word = word;
+  }
+
+  public Double getCompDegree() {
+    return compDegree;
+  }
+
+  public void setCompDegree(Double compDegree) {
+    this.compDegree = compDegree;
+  }
 }
