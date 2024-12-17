@@ -9,6 +9,8 @@ public class CommentVo {
   private String username;
   // 关联的竞争性关键词id
   private Long compwordId;
+  //竞争性关键词
+  private String word;
   // 分数
   private int grade;
   // 评论内容
@@ -54,4 +56,11 @@ public class CommentVo {
     this.text = text;
   }
 
+  public String getWord() {
+    return word;
+  }
+
+  public void setWord(String word) {
+    this.word = word;
+  }
 }

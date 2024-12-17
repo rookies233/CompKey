@@ -7,6 +7,7 @@ import io.vertx.ext.web.RoutingContext;
 import team.moyu.fishfind.common.CommonResponse;
 import team.moyu.fishfind.common.ResultUtils;
 import team.moyu.fishfind.entity.Comment;
+import team.moyu.fishfind.vo.CommentVo;
 import team.moyu.fishfind.service.CommentService;
 import team.moyu.fishfind.vo.CommentVo;
 
@@ -88,7 +89,7 @@ public class CommentHandler {
   }
 
   // 获取评论列表
-  public void getAllComments(RoutingContext context) {
+  public void getAllCommentsById(RoutingContext context) {
     // 从请求路径中获取竞争关键词id
     String compwordIdParam = context.request().getParam("compwordId");
     if (compwordIdParam == null) {
@@ -106,7 +107,7 @@ public class CommentHandler {
       return;
     }
 
-    commentService.getAllComments(compwordId)
+    commentService.getAllCommentsById(compwordId)
       .onSuccess(resultMessage -> {
         CommonResponse<List<CommentVo>> response = ResultUtils.success(resultMessage);
         try {
@@ -117,6 +118,27 @@ public class CommentHandler {
       })
       .onFailure(err -> {
         context.response().setStatusCode(404).putHeader("content-type", "application/json")
+          .end(new JsonObject().put("error", err.getMessage()).toString());
+      });
+  }
+  public void getAllComments(RoutingContext context) {
+    commentService.getAllComments()
+      .onSuccess(commentVos -> {
+        if (commentVos != null) {
+          CommonResponse<List<CommentVo>> response = ResultUtils.success(commentVos);
+          try {
+            context.response().putHeader("content-type", "application/json")
+              .end(mapper.writeValueAsString(response));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        } else {
+          context.response().setStatusCode(404).putHeader("content-type", "application/json")
+            .end(new JsonObject().put("error", "Comment not found").toString());
+        }
+      })
+      .onFailure(err -> {
+        context.response().setStatusCode(500).putHeader("content-type", "application/json")
           .end(new JsonObject().put("error", err.getMessage()).toString());
       });
   }

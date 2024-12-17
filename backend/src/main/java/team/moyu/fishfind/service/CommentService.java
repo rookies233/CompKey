@@ -19,6 +19,8 @@ public interface CommentService {
   Future<String> deleteComment(Long commentId);
 
   // 根据竞争关键词id查询所有评论
-  Future<List<CommentVo>> getAllComments(Long compwordId);
+  Future<List<CommentVo>> getAllCommentsById(Long compwordId);
+
+  Future<List<CommentVo>> getAllComments();
 
 }
