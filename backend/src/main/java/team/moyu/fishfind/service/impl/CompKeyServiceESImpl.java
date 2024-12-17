@@ -294,6 +294,17 @@ public class CompKeyServiceESImpl implements CompKeyService {
     if (compKeys.size() > 20) {
       compKeys = compKeys.subList(0, 20);
     }
+
+    // 乘1000
+    for (CompKeyRespDTO compKey : compKeys) {
+      compKey.setCompScore(compKey.getCompScore() * 1000);
+    }
+
+    // 保留三位有效数字
+    for (CompKeyRespDTO compKey : compKeys) {
+      compKey.setCompScore((double) Math.round(compKey.getCompScore() * 1000) / 1000);
+    }
+
     return Future.succeededFuture(compKeys);
   }
 
