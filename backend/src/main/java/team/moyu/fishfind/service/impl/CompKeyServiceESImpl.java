@@ -3,13 +3,8 @@ package team.moyu.fishfind.service.impl;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.sqlclient.Pool;
-import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.templates.SqlTemplate;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchRequest;
@@ -24,7 +19,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import team.moyu.fishfind.dto.CompKeyReqDTO;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
 import team.moyu.fishfind.entity.CompWord;
-import team.moyu.fishfind.entity.CompWordRowMapper;
 import team.moyu.fishfind.entity.UsedSeedWord;
 import team.moyu.fishfind.model.AgencyWordInfo;
 import team.moyu.fishfind.model.CompKeyWordInfo;
@@ -33,13 +27,9 @@ import org.elasticsearch.client.*;
 import team.moyu.fishfind.service.SeedWordService;
 import team.moyu.fishfind.service.UsedSeedWordService;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CompKeyServiceESImpl implements CompKeyService {
 
@@ -170,7 +160,7 @@ public class CompKeyServiceESImpl implements CompKeyService {
 
     // 构建查询条件
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-      .must(QueryBuilders.matchQuery("query_content", seedWord))
+      .mustNot(QueryBuilders.matchQuery("query_content", seedWord))
       .must(QueryBuilders.matchQuery("query_content", agencyWordInfo.getAgencyWord()));
 
     // 构建聚合
