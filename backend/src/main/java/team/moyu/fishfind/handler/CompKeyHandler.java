@@ -1,0 +1,39 @@
+package team.moyu.fishfind.handler;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.ext.web.RoutingContext;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import team.moyu.fishfind.common.CommonResponse;
+import team.moyu.fishfind.common.ResultUtils;
+import team.moyu.fishfind.dto.CompKeyRespDTO;
+import team.moyu.fishfind.service.CompKeyService;
+
+import java.util.List;
+
+public class CompKeyHandler {
+
+  private final CompKeyService compKeyService;
+
+  private final ObjectMapper mapper;
+
+  public CompKeyHandler(CompKeyService compKeyService, ObjectMapper mapper) {
+    this.compKeyService = compKeyService;
+    this.mapper = mapper;
+  }
+
+  public void getCompWords(RoutingContext context) {
+    String seedWord = context.request().getParam("seedWord");
+    compKeyService.getCompKeys(seedWord).onSuccess(results -> {
+      CommonResponse<List<CompKeyRespDTO>> response = ResultUtils.success(results);
+      try {
+        context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    }).onFailure(err -> {
+      context.response().setStatusCode(500).putHeader("content-type", "application/json").end(err.getMessage());
+    });
+  }
+}

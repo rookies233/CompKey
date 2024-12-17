@@ -12,14 +12,23 @@ import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import team.moyu.fishfind.handler.CompKeyHandler;
 import team.moyu.fishfind.handler.UsedSeedWordHandler;
 import team.moyu.fishfind.handler.UserHandler;
+import team.moyu.fishfind.service.CompKeyService;
 import team.moyu.fishfind.service.UsedSeedWordService;
 import team.moyu.fishfind.service.UserService;
+import team.moyu.fishfind.service.impl.CompKeyServiceESImpl;
 import team.moyu.fishfind.service.impl.UsedSeedWordServiceImpl;
 import team.moyu.fishfind.service.impl.UserServiceImpl;
+import org.elasticsearch.client.*;
 
 public class MainVerticle extends AbstractVerticle {
+
+  private RestHighLevelClient esClient;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -42,6 +51,14 @@ public class MainVerticle extends AbstractVerticle {
       .using(vertx)
       .build();
 
+    // 单击所创建的Elasticsearch实例ID，在基本信息页面获取公网地址，即为ES集群地址。
+    RestClientBuilder builder = RestClient.builder(new HttpHost(
+      "119.29.194.130", 9200, "http"));
+
+    // RestHighLevelClient实例通过REST high-level client builder进行构造。
+    esClient = new RestHighLevelClient(builder);
+
+
     // 初始化服务与处理器
     ObjectMapper mapper = DatabindCodec.mapper();
     mapper.registerModule(new JavaTimeModule());
@@ -51,6 +68,9 @@ public class MainVerticle extends AbstractVerticle {
     //用户搜索记录管理模块
     UsedSeedWordService usedSeedWordService = new UsedSeedWordServiceImpl(client);
     UsedSeedWordHandler usedSeedWordHandler = new UsedSeedWordHandler(usedSeedWordService, mapper);
+
+    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient);
+    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, mapper);
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
@@ -75,6 +95,8 @@ public class MainVerticle extends AbstractVerticle {
     // 查询搜索记录
     router.get("/usedSeedWords/:userId").handler(usedSeedWordHandler::getUsedSeedWords);
 
+    router.get("/compKeys").handler(compKeyHandler::getCompWords);
+
     vertx.createHttpServer()
       .requestHandler(router)
       .listen(8080)
@@ -86,6 +108,12 @@ public class MainVerticle extends AbstractVerticle {
           startPromise.fail(http.cause());
         }
       });
+  }
+
+  @Override
+  public void stop() throws Exception {
+    esClient.close();
+    super.stop();
   }
 
   public static void main(String[] args) {

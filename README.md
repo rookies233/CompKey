@@ -18,3 +18,4 @@
    3. seg_list.train：在cleaned.train基础上分词
    4. filter_list.train：在seg_list.train基础上去除停用词
 3. 分词比较数据：使用icwb2-data中的数据作为测试集进行分词比较
+
