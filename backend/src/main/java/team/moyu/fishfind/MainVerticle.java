@@ -16,12 +16,15 @@ import io.vertx.sqlclient.PoolOptions;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
+import team.moyu.fishfind.handler.CommentHandler;
 import team.moyu.fishfind.handler.CompKeyHandler;
 import team.moyu.fishfind.handler.UsedSeedWordHandler;
 import team.moyu.fishfind.handler.UserHandler;
+import team.moyu.fishfind.service.CommentService;
 import team.moyu.fishfind.service.CompKeyService;
 import team.moyu.fishfind.service.UsedSeedWordService;
 import team.moyu.fishfind.service.UserService;
+import team.moyu.fishfind.service.impl.CommentServiceImpl;
 import team.moyu.fishfind.service.impl.CompKeyServiceESImpl;
 import team.moyu.fishfind.service.impl.UsedSeedWordServiceImpl;
 import team.moyu.fishfind.service.impl.UserServiceImpl;
@@ -69,9 +72,12 @@ public class MainVerticle extends AbstractVerticle {
     //用户搜索记录管理模块
     UsedSeedWordService usedSeedWordService = new UsedSeedWordServiceImpl(client);
     UsedSeedWordHandler usedSeedWordHandler = new UsedSeedWordHandler(usedSeedWordService, mapper);
-
-    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient, client);
-    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, usedSeedWordService, mapper);
+    // 搜索模块
+    CompKeyService compKeyService = new CompKeyServiceESImpl(esClient);
+    CompKeyHandler compKeyHandler = new CompKeyHandler(compKeyService, mapper);
+    // 评论模块
+    CommentService commentService = new CommentServiceImpl(client);
+    CommentHandler commentHandler = new CommentHandler(commentService, mapper);
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
@@ -109,7 +115,16 @@ public class MainVerticle extends AbstractVerticle {
     // 查询搜索记录
     router.get("/usedSeedWords/:userId").handler(usedSeedWordHandler::getUsedSeedWords);
 
+    // 搜索模块
     router.get("/compKeys").handler(compKeyHandler::getCompWords);
+
+    // 评论模块
+    // 添加评论
+    router.post("/comments").handler(commentHandler::addComment);
+    // 删除评论
+    router.delete("/comments/:id").handler(commentHandler::deleteComment);
+    // 获取评论
+    router.get("/comments/:compwordId").handler(commentHandler::getAllComments);
 
     vertx.createHttpServer()
       .requestHandler(router)
