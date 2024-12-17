@@ -84,7 +84,28 @@ public class CompKeyServiceESImpl implements CompKeyService {
 
     return getAgencyWords(requestParam.getSeedWord())
       .compose(agencyWordInfos -> getCompetitorKeywords(requestParam.getSeedWord(), agencyWordInfos))
-      .compose(this::saveCompKey);
+      .compose(this::saveCompKey)
+      .compose(this::generateRandomCompScore);
+  }
+
+  /**
+   * 按List的顺序，从高到低，有下降趋势的生成随机的竞争性关键词分数，小数，不用存数据库
+   * @param compKeys
+   * @return
+   */
+  private Future<List<CompKeyRespDTO>> generateRandomCompScore(List<CompKeyRespDTO> compKeys) {
+    Promise<List<CompKeyRespDTO>> promise = Promise.promise();
+    List<Future> futures = new ArrayList<>();
+
+    for (int i = 0; i < compKeys.size(); i++) {
+      CompKeyRespDTO compKey = compKeys.get(i);
+      double score = 0.7 + Math.random() * 0.2 - 0.03 * i;
+      compKey.setCompScore(score);
+      compKeys.set(i, compKey);
+    }
+
+    promise.complete(compKeys);
+    return promise.future();
   }
 
   private Future<List<CompKeyRespDTO>> saveCompKey(List<CompKeyRespDTO> compKeys) {

@@ -13,6 +13,8 @@ public class CompKeyRespDTO {
    */
   private String compWord;
 
+  private Double compScore;
+
   public String getCompWord() {
     return compWord;
   }
@@ -27,5 +29,13 @@ public class CompKeyRespDTO {
 
   public void setCompWordId(Long compWordId) {
     this.compWordId = compWordId;
+  }
+
+  public Double getCompScore() {
+    return compScore;
+  }
+
+  public void setCompScore(Double compScore) {
+    this.compScore = compScore;
   }
 }
