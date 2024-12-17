@@ -11,6 +11,7 @@ import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 import team.moyu.fishfind.service.UserService;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -132,6 +133,8 @@ public class UserHandler {
           .end(new JsonObject().put("error", err.getMessage()).toString());
       });
   }
+
+  // 获取用户信息
   public void getUserById(RoutingContext context) {
     // 从请求路径中获取用户 ID
     String userIdParam = context.request().getParam("id");
@@ -163,6 +166,29 @@ public class UserHandler {
         } else {
           context.response().setStatusCode(404).putHeader("content-type", "application/json")
             .end(new JsonObject().put("error", "User not found").toString());
+        }
+      })
+      .onFailure(err -> {
+        context.response().setStatusCode(500).putHeader("content-type", "application/json")
+          .end(new JsonObject().put("error", err.getMessage()).toString());
+      });
+  }
+
+  // 获取所有用户信息
+  public void getUsers(RoutingContext context) {
+    userService.getAllUsers()
+      .onSuccess(users -> {
+        if (users != null) {
+          CommonResponse<List<User>> response = ResultUtils.success(users);
+          try {
+            context.response().putHeader("content-type", "application/json")
+              .end(mapper.writeValueAsString(response));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        } else {
+          context.response().setStatusCode(404).putHeader("content-type", "application/json")
+            .end(new JsonObject().put("error", "Users not found").toString());
         }
       })
       .onFailure(err -> {

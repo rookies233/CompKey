@@ -10,10 +10,20 @@ import java.time.LocalDateTime;
  */
 public class UsedSeedWordsVo {
 
+  private Long id;
+
   private String seedWord;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime time;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public String getSeedWord() {
     return seedWord;

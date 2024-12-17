@@ -2,6 +2,7 @@ package team.moyu.fishfind.service.impl;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Pool;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.templates.SqlTemplate;
@@ -9,6 +10,8 @@ import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 import team.moyu.fishfind.service.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -157,6 +160,23 @@ public class UserServiceImpl implements UserService {
         }
         User user = users.iterator().next();
         return Future.succeededFuture(user);
+      });
+  }
+
+  @Override
+  public Future<List<User>> getAllUsers() {
+    // 获取用户列表的查询语句
+    String query = "SELECT * FROM user";
+
+    return SqlTemplate.forQuery(client, query)
+      .mapTo(User.class)
+      .execute(Map.of())
+      .map(users -> {
+        List<User> userList = new ArrayList<>();
+        for (User user : users) {
+          userList.add(user);
+        }
+        return userList;
       });
   }
 }
