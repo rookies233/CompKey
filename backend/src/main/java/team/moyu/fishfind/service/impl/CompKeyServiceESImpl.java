@@ -17,6 +17,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import team.moyu.fishfind.dto.CompKeyRespDTO;
+import team.moyu.fishfind.model.AgencyWordInfo;
 import team.moyu.fishfind.service.CompKeyService;
 import org.elasticsearch.client.*;
 
@@ -55,11 +56,11 @@ public class CompKeyServiceESImpl implements CompKeyService {
   @Override
   public Future<List<CompKeyRespDTO>> getCompKeys(String seedWord) {
     return getAgencyWords(seedWord)
-      .compose(agencyWords -> getCompetitorKeywords(seedWord, agencyWords));
+      .compose(agencyWordInfos -> getCompetitorKeywords(seedWord, agencyWordInfos));
   }
 
-  private Future<List<String>> getAgencyWords(String seedWord) {
-    Promise<List<String>> promise = Promise.promise();
+  private Future<List<AgencyWordInfo>> getAgencyWords(String seedWord) {
+    Promise<List<AgencyWordInfo>> promise = Promise.promise();
 
     // 创建搜索请求
     SearchRequest searchRequest = new SearchRequest("compkey");
@@ -81,7 +82,7 @@ public class CompKeyServiceESImpl implements CompKeyService {
     client.searchAsync(searchRequest, RequestOptions.DEFAULT, new ActionListener<>() {
       @Override
       public void onResponse(SearchResponse response) {
-        List<String> agencyWords = new ArrayList<>();
+        List<AgencyWordInfo> agencyWordInfos = new ArrayList<>();
 
         // 处理聚合结果
         Terms terms = response.getAggregations().get("related_terms");
@@ -89,11 +90,19 @@ public class CompKeyServiceESImpl implements CompKeyService {
           if (stopWords.contains(bucket.getKeyAsString())) {
             continue;
           }
-          agencyWords.add(bucket.getKeyAsString());
+          AgencyWordInfo agencyWord = new AgencyWordInfo();
+          agencyWord.setAgencyWord(bucket.getKeyAsString());
+          agencyWord.setSa(bucket.getDocCount());
+          agencyWordInfos.add(agencyWord);
+        }
+
+        List<String> agencyWords = new ArrayList<>();
+        for (AgencyWordInfo agencyWordInfo : agencyWordInfos) {
+          agencyWords.add(agencyWordInfo.getAgencyWord());
         }
 
         System.out.println("种子关键词: " + seedWord + ", 中介关键词: " + agencyWords.size() + agencyWords);
-        promise.complete(agencyWords);
+        promise.complete(agencyWordInfos);
       }
 
       @Override
@@ -107,11 +116,16 @@ public class CompKeyServiceESImpl implements CompKeyService {
     return promise.future();
   }
 
-  private Future<List<CompKeyRespDTO>> getCompetitorKeywords(String seedWord, List<String> agencyWords) {
+  private Future<List<CompKeyRespDTO>> getCompetitorKeywords(String seedWord, List<AgencyWordInfo> agencyWordInfos) {
     Promise<List<CompKeyRespDTO>> promise = Promise.promise();
 
     // 创建搜索请求
     SearchRequest searchRequest = new SearchRequest("compkey");
+
+    List<String> agencyWords = new ArrayList<>();
+    for (AgencyWordInfo agencyWordInfo : agencyWordInfos) {
+      agencyWords.add(agencyWordInfo.getAgencyWord());
+    }
 
     // 构建查询条件（Bool 查询）
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()

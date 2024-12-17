@@ -86,7 +86,7 @@ public class MainVerticle extends AbstractVerticle {
       .allowedHeader("Authorization");
 
     // 将 CorsHandler 添加到路由链中
-    router.route().handler(corsHandler);
+    router.route().handler(corsHandler).handler(BodyHandler.create());
     // 用户管理模块
     // 登录
     router.post("/users/login").handler(userHandler::login);
