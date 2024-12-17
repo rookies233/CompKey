@@ -4,6 +4,8 @@ import io.vertx.core.Future;
 import team.moyu.fishfind.dto.UserLoginReqDTO;
 import team.moyu.fishfind.entity.User;
 
+import java.util.List;
+
 /**
  * @author moyu
  */
@@ -21,7 +23,10 @@ public interface UserService {
   // 删除用户
   Future<String> deleteUser(Long userId);
 
-  //获取用户信息
+  // 获取用户信息
   Future<User> getUserById(Long userId);
+
+  // 获取所有用户信息
+  Future<List<User>> getAllUsers();
 
 }
