@@ -92,7 +92,7 @@ public class CompKeyServiceESImpl implements CompKeyService {
           agencyWords.add(bucket.getKeyAsString());
         }
 
-        System.out.println("种子关键词: " + seedWord + ", 中介关键词: " + agencyWords);
+        System.out.println("种子关键词: " + seedWord + ", 中介关键词: " + agencyWords.size() + agencyWords);
         promise.complete(agencyWords);
       }
 
@@ -142,7 +142,6 @@ public class CompKeyServiceESImpl implements CompKeyService {
         List<CompKeyRespDTO> compKeys = new ArrayList<>();
         // 处理响应结果
         Terms terms = response.getAggregations().get("competitor_keywords");
-        System.out.println("Top competitor keywords:");
         for (Terms.Bucket bucket : terms.getBuckets()) {
           if (stopWords.contains(bucket.getKeyAsString())) {
             continue;
