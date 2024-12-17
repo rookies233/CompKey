@@ -48,6 +48,14 @@ CREATE TABLE comments
 
 INSERT INTO user (username, password, telephone, email)
 VALUES ('admin', '123456', '12345678901', '12345678901@qq.com');
+INSERT INTO user (username, password, telephone, email)
+VALUES ('xst', '123456', '12345678901', '12345678901@qq.com');
+INSERT INTO user (username, password, telephone, email)
+VALUES ('cz', '123456', '12345678901', '12345678901@qq.com');
+INSERT INTO user (username, password, telephone, email)
+VALUES ('hyx', '123456', '12345678901', '12345678901@qq.com');
+INSERT INTO user (username, password, telephone, email)
+VALUES ('gz', '123456', '18379515489', '2235837213@qq.com');
 
 INSERT INTO seedword (word, introduction)
 VALUES ('图片', '图片');
@@ -75,3 +83,17 @@ VALUES ('图片', '图片');
 
 INSERT INTO used_seedword(seedword_id, user_id, time)
 VALUES ('1', '1', '2024-11-27 11:30:00')
+
+INSERT INTO comments(user_id, compword_id, grade, comment_text)
+VALUES ('4',1,3.5,'推荐的什么玩意');
+INSERT INTO comments(user_id, compword_id, grade, comment_text)
+VALUES ('3',2,5,'还可以');
+INSERT INTO comments(user_id, compword_id, grade, comment_text)
+VALUES ('5',3,0,'不错');
+
+INSERT INTO compword(word,compdegree)
+VALUES ('中秋节',85);
+INSERT INTO compword(word,compdegree)
+VALUES ('视频',85);
+INSERT INTO compword(word,compdegree)
+VALUES ('下载',85);
