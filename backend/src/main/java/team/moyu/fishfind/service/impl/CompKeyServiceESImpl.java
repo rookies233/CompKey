@@ -1,5 +1,7 @@
 package team.moyu.fishfind.service.impl;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -30,6 +32,7 @@ import team.moyu.fishfind.service.UsedSeedWordService;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class CompKeyServiceESImpl implements CompKeyService {
 
@@ -42,6 +45,8 @@ public class CompKeyServiceESImpl implements CompKeyService {
   private final SeedWordService seedWordService;
 
   private static final Set<String> stopWords;
+
+
 
   static {
     System.out.println("加载停用词...");
@@ -65,24 +70,10 @@ public class CompKeyServiceESImpl implements CompKeyService {
 
   @Override
   public Future<List<CompKeyRespDTO>> getCompKeys(CompKeyReqDTO requestParam) {
-    seedWordService
-      .addSeedWord(requestParam.getSeedWord())
-      .onSuccess(seedWord -> {
-        UsedSeedWord usedSeedWord = new UsedSeedWord();
-        usedSeedWord.setSeedWordId(seedWord.getId());
-        usedSeedWord.setUserId(requestParam.getUserId());
-        usedSeedWordService.addUsedSeedWord(usedSeedWord);
-      });
-
-//    return getAgencyWords(requestParam.getSeedWord())
-//      .compose(this::getAgencyWordsWeight)
-//      .compose(agencyWordInfos -> getCompetitorKeywords(requestParam.getSeedWord(), agencyWordInfos))
-//      .compose(this::saveCompKey)
-//      .compose(this::generateRandomCompScore);
-
-    return getAgencyWords(requestParam.getSeedWord())
+    String paramSeedWord = requestParam.getSeedWord();
+    return getAgencyWords(paramSeedWord)
       .compose(this::getAgencyWordsWeight)
-      .compose(agencyWordInfos -> getAgencyWordsCompKeys(requestParam.getSeedWord(), agencyWordInfos))
+      .compose(agencyWordInfos -> getAgencyWordsCompKeys(paramSeedWord, agencyWordInfos))
       .compose(this::calculateCompScore)
       .compose(this::saveCompKey);
   }
