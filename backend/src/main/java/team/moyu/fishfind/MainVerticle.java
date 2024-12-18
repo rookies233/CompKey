@@ -36,7 +36,7 @@ public class MainVerticle extends AbstractVerticle {
       .setHost("localhost")
       .setDatabase("fishfind")
       .setUser("root")
-      .setPassword("123456");
+      .setPassword("Hyx_123456");
 
     // 连接池选项
     PoolOptions poolOptions = new PoolOptions()
@@ -121,7 +121,9 @@ public class MainVerticle extends AbstractVerticle {
     // 删除评论
     router.delete("/comments/:id").handler(commentHandler::deleteComment);
     // 获取评论
-    router.get("/comments/:compwordId").handler(commentHandler::getAllComments);
+    router.get("/comments/:compwordId").handler(commentHandler::getAllCommentsById);
+    // 获取所有评论
+    router.get("/comments").handler(commentHandler::getAllComments);
 
     vertx.createHttpServer()
       .requestHandler(router)

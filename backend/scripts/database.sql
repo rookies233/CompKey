@@ -82,7 +82,7 @@ VALUES ('图片', '图片');
 # VALUES ('动漫', '1');
 
 INSERT INTO used_seedword(seedword_id, user_id, time)
-VALUES ('1', '1', '2024-11-27 11:30:00')
+VALUES ('1', '1', '2024-11-27 11:30:00');
 
 INSERT INTO comments(user_id, compword_id, grade, comment_text)
 VALUES ('4',1,3.5,'推荐的什么玩意');
