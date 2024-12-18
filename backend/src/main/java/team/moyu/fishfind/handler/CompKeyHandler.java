@@ -39,16 +39,16 @@ public class CompKeyHandler {
     String seedWord = context.request().getParam("seedWord");
 
     // 从缓存中获取数据
-    List<CompKeyRespDTO> cacheResult = cache.getIfPresent(seedWord);
-    if (cacheResult != null) {
-      CommonResponse<List<CompKeyRespDTO>> response = ResultUtils.success(cacheResult);
-      try {
-        context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException(e);
-      }
-      return;
-    }
+//    List<CompKeyRespDTO> cacheResult = cache.getIfPresent(seedWord);
+//    if (cacheResult != null) {
+//      CommonResponse<List<CompKeyRespDTO>> response = ResultUtils.success(cacheResult);
+//      try {
+//        context.response().putHeader("content-type", "application/json").end(mapper.writeValueAsString(response));
+//      } catch (JsonProcessingException e) {
+//        throw new RuntimeException(e);
+//      }
+//      return;
+//    }
 
     Long userId = Long.parseLong(context.request().getParam("userId"));
     CompKeyReqDTO requestParam = new CompKeyReqDTO();
