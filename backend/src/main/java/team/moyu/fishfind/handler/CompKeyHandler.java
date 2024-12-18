@@ -57,7 +57,7 @@ public class CompKeyHandler {
     compKeyService.getCompKeys(requestParam).onSuccess(results -> {
 
       // 将结果放入缓存
-      cache.put(seedWord, results);
+//      cache.put(seedWord, results);
 
       CommonResponse<List<CompKeyRespDTO>> response = ResultUtils.success(results);
       try {
