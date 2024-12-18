@@ -36,7 +36,7 @@ public class MainVerticle extends AbstractVerticle {
       .setHost("localhost")
       .setDatabase("fishfind")
       .setUser("root")
-      .setPassword("Hyx_123456");
+      .setPassword("123456");
 
     // 连接池选项
     PoolOptions poolOptions = new PoolOptions()

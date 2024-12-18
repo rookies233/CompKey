@@ -286,14 +286,14 @@ public class CompKeyServiceESImpl implements CompKeyService {
       compKeys = compKeys.subList(0, 20);
     }
 
-    // 乘1000
+    // 乘100000
     for (CompKeyRespDTO compKey : compKeys) {
-      compKey.setCompScore(compKey.getCompScore() * 1000);
+      compKey.setCompScore(compKey.getCompScore() * 100000);
     }
 
-    // 保留三位有效数字
+    // 保留五位有效数字
     for (CompKeyRespDTO compKey : compKeys) {
-      compKey.setCompScore((double) Math.round(compKey.getCompScore() * 1000) / 1000);
+      compKey.setCompScore((double) Math.round(compKey.getCompScore() * 100) / 100);
     }
 
     return Future.succeededFuture(compKeys);
